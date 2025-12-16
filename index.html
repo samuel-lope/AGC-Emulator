@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apollo Guidance Computer (AGC) Emulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-color: #1a1a1a;
+        --case-color: #2b2b2b;
+        --segment-on: #4aff4a;
+        --indicator-on: #ffcc00;
+      }
+      body {
+        background-color: var(--bg-color);
+        background-image: radial-gradient(circle at 50% 50%, #2a2a2a 0%, #000 100%);
+        color: #e0e0e0;
+        font-family: 'Share Tech Mono', monospace;
+      }
+      /* Custom glowing effect for the DSKY numbers */
+      .dsky-digit {
+        text-shadow: 0 0 4px rgba(74, 255, 74, 0.6);
+      }
+      .indicator-on {
+         box-shadow: 0 0 8px currentColor;
+      }
+      
+      /* Custom Scrollbar for Logs */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #111; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #333; 
+        border: 1px solid #000;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

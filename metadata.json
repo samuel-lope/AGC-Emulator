@@ -1,0 +1,5 @@
+{
+  "name": "Apollo Guidance Computer Emulator",
+  "description": "A didactic, web-based emulator of the Apollo Guidance Computer (AGC) DSKY interface. Features interactive Verb-Noun input, simulated lunar landing physics, and AI-powered mission guidance.",
+  "requestFramePermissions": []
+}
