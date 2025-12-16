@@ -4,6 +4,7 @@ import SevenSegment from './components/SevenSegment';
 import IndicatorPanel from './components/IndicatorPanel';
 import Keypad from './components/Keypad';
 import MissionLog from './components/MissionLog';
+import Radar from './components/Radar';
 import { DSKYState, IndicatorState, IndicatorName, PhysicsState, MissionLogEntry, InputMode, Scenario, ScenarioEvent } from './types';
 import { INITIAL_INDICATORS, INITIAL_PHYSICS, PROGRAM_CODES, DEFAULT_SCENARIOS, AGC_DICTIONARY } from './constants';
 import { getCapcomGuidance } from './services/geminiService';
@@ -32,6 +33,9 @@ const App: React.FC = () => {
   const [missionStartTime, setMissionStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   
+  // UI State
+  const [activeTab, setActiveTab] = useState<'SYSTEM' | 'RADAR'>('SYSTEM');
+
   // Active Event Engine State
   const [activeEvents, setActiveEvents] = useState<ScenarioEvent[]>([]);
 
@@ -634,8 +638,10 @@ const App: React.FC = () => {
             </div>
         </div>
 
-        {/* RIGHT: CONTROLS */}
+        {/* RIGHT: CONTROLS (TABBED) */}
         <div className="flex flex-col w-full max-w-[500px] gap-6">
+             
+             {/* HEADER */}
              <div className="border-b border-gray-700 pb-2 flex flex-col">
                  <div className="flex justify-between items-start">
                     <h1 className="text-4xl text-white font-bold tracking-widest font-['Share_Tech_Mono']" style={{textShadow: '0 0 10px rgba(74, 255, 74, 0.4)'}}>AGC EMULATOR</h1>
@@ -648,74 +654,105 @@ const App: React.FC = () => {
                  </div>
              </div>
 
-             <div className="bg-[#1a1a1a] border border-[#333] p-4 shadow-xl">
-                 <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs text-[#4aff4a] font-bold tracking-widest uppercase">Mission Profile</label>
-                    <div className="h-1 w-16 bg-[#333]"></div>
-                 </div>
-                 <div className="flex flex-col sm:flex-row gap-0">
-                    <select 
-                        value={selectedScenarioId} 
-                        onChange={(e) => setSelectedScenarioId(e.target.value)}
-                        className="flex-grow bg-black text-[#4aff4a] border border-[#333] p-3 font-mono text-sm outline-none focus:border-[#4aff4a] transition-colors appearance-none rounded-none"
-                    >
-                        {scenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
-                    <button 
-                        onClick={() => loadScenario(selectedScenarioId)}
-                        className="bg-[#004400] hover:bg-[#006600] text-white px-6 py-3 text-sm font-bold tracking-wider border-t sm:border-t border-b border-r border-[#333] sm:border-l-0 transition-colors uppercase"
-                    >
-                        INIT
-                    </button>
-                    
-                    {/* HIDDEN INPUT & IMPORT BUTTON */}
-                    <input 
-                        type="file" 
-                        ref={fileInputRef}
-                        className="hidden" 
-                        accept=".json"
-                        onChange={handleFileUpload}
-                    />
-                    <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="bg-[#333] hover:bg-[#444] text-[#aaa] px-4 py-3 text-sm font-bold border-t border-b border-r border-[#333] transition-colors"
-                        title="Import JSON Scenario"
-                    >
-                        (+)
-                    </button>
-                 </div>
+             {/* TABS */}
+             <div className="flex border-b border-[#333]">
+                 <button 
+                    onClick={() => setActiveTab('SYSTEM')}
+                    className={`flex-1 py-2 text-sm font-bold tracking-widest uppercase transition-colors ${activeTab === 'SYSTEM' ? 'bg-[#1a1a1a] text-[#4aff4a] border-t-2 border-[#4aff4a]' : 'bg-[#111] text-gray-600 hover:text-gray-400'}`}
+                 >
+                     System Console
+                 </button>
+                 <button 
+                    onClick={() => setActiveTab('RADAR')}
+                    className={`flex-1 py-2 text-sm font-bold tracking-widest uppercase transition-colors ${activeTab === 'RADAR' ? 'bg-[#1a1a1a] text-[#4aff4a] border-t-2 border-[#4aff4a]' : 'bg-[#111] text-gray-600 hover:text-gray-400'}`}
+                 >
+                     Landing Radar
+                 </button>
              </div>
 
-             <div className="flex-grow">
-                 <div className="flex justify-between items-end mb-2">
-                    <span className="text-xs text-[#4aff4a] font-bold tracking-widest uppercase">Data Link</span>
-                    <span className="text-[10px] text-green-500 font-mono animate-pulse">● SIGNAL LOCKED</span>
-                 </div>
-                 <MissionLog logs={logs} />
-             </div>
+             {/* TAB CONTENT */}
+             <div className="flex-grow min-h-[400px]">
+                 {activeTab === 'SYSTEM' && (
+                     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+                         {/* MISSION PROFILE */}
+                         <div className="bg-[#1a1a1a] border border-[#333] p-4 shadow-xl">
+                             <div className="flex items-center justify-between mb-2">
+                                <label className="text-xs text-[#4aff4a] font-bold tracking-widest uppercase">Mission Profile</label>
+                                <div className="h-1 w-16 bg-[#333]"></div>
+                             </div>
+                             <div className="flex flex-col sm:flex-row gap-0">
+                                <select 
+                                    value={selectedScenarioId} 
+                                    onChange={(e) => setSelectedScenarioId(e.target.value)}
+                                    className="flex-grow bg-black text-[#4aff4a] border border-[#333] p-3 font-mono text-sm outline-none focus:border-[#4aff4a] transition-colors appearance-none rounded-none"
+                                >
+                                    {scenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                </select>
+                                <button 
+                                    onClick={() => loadScenario(selectedScenarioId)}
+                                    className="bg-[#004400] hover:bg-[#006600] text-white px-6 py-3 text-sm font-bold tracking-wider border-t sm:border-t border-b border-r border-[#333] sm:border-l-0 transition-colors uppercase"
+                                >
+                                    INIT
+                                </button>
+                                
+                                {/* HIDDEN INPUT & IMPORT BUTTON */}
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef}
+                                    className="hidden" 
+                                    accept=".json"
+                                    onChange={handleFileUpload}
+                                />
+                                <button 
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="bg-[#333] hover:bg-[#444] text-[#aaa] px-4 py-3 text-sm font-bold border-t border-b border-r border-[#333] transition-colors"
+                                    title="Import JSON Scenario"
+                                >
+                                    (+)
+                                </button>
+                             </div>
+                         </div>
 
-             {/* REFERENCE CHEAT SHEET */}
-             <div className="bg-[#1a1a1a] border border-[#333] p-4 shadow-xl">
-                <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs text-[#4aff4a] font-bold tracking-widest uppercase">Quick Reference</label>
-                    <div className="h-1 w-16 bg-[#333]"></div>
-                </div>
-                <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                    <div>
-                        <div className="text-gray-500 mb-1 font-bold">MONITORS</div>
-                        <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">V16 N62</span> <span className="text-gray-400">Flight Data</span></div>
-                        <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">V16 N68</span> <span className="text-gray-400">Landing Radar</span></div>
-                    </div>
-                    <div>
-                        <div className="text-gray-500 mb-1 font-bold">PROGRAMS (V37)</div>
-                        <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">N63</span> <span className="text-gray-400">Braking</span></div>
-                        <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">N66</span> <span className="text-gray-400">Manual Desc</span></div>
-                        <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">PRO</span> <span className="text-gray-400">Confirm/Ignite</span></div>
-                    </div>
-                </div>
-                <div className="mt-2 pt-2 border-t border-[#333] text-[10px] text-gray-500">
-                    KEYS: [9] THRUST+ | [6] THRUST- | [RSET] ALARM CLEAR
-                </div>
+                         {/* DATA LINK */}
+                         <div className="flex-grow">
+                             <div className="flex justify-between items-end mb-2">
+                                <span className="text-xs text-[#4aff4a] font-bold tracking-widest uppercase">Data Link</span>
+                                <span className="text-[10px] text-green-500 font-mono animate-pulse">● SIGNAL LOCKED</span>
+                             </div>
+                             <MissionLog logs={logs} />
+                         </div>
+
+                         {/* REFERENCE CHEAT SHEET */}
+                         <div className="bg-[#1a1a1a] border border-[#333] p-4 shadow-xl">
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="text-xs text-[#4aff4a] font-bold tracking-widest uppercase">Quick Reference</label>
+                                <div className="h-1 w-16 bg-[#333]"></div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                                <div>
+                                    <div className="text-gray-500 mb-1 font-bold">MONITORS</div>
+                                    <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">V16 N62</span> <span className="text-gray-400">Flight Data</span></div>
+                                    <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">V16 N68</span> <span className="text-gray-400">Landing Radar</span></div>
+                                </div>
+                                <div>
+                                    <div className="text-gray-500 mb-1 font-bold">PROGRAMS (V37)</div>
+                                    <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">N63</span> <span className="text-gray-400">Braking</span></div>
+                                    <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">N66</span> <span className="text-gray-400">Manual Desc</span></div>
+                                    <div className="flex justify-between mb-1"><span className="text-[#4aff4a]">PRO</span> <span className="text-gray-400">Confirm/Ignite</span></div>
+                                </div>
+                            </div>
+                            <div className="mt-2 pt-2 border-t border-[#333] text-[10px] text-gray-500">
+                                KEYS: [9] THRUST+ | [6] THRUST- | [RSET] ALARM CLEAR
+                            </div>
+                         </div>
+                     </div>
+                 )}
+
+                 {activeTab === 'RADAR' && (
+                     <div className="h-full animate-in fade-in duration-300">
+                         <Radar physics={physics} />
+                     </div>
+                 )}
              </div>
         </div>
 
